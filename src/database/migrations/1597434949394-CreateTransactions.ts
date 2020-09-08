@@ -17,23 +17,27 @@ export class CreateTransactions1597434949394 implements MigrationInterface {
             },
             {
               name: 'title',
-              type: 'varchar'
-            },
-            {
-              name: 'value',
-              type: 'varchar'
+              type: 'varchar',
             },
             {
               name: 'type',
-              type: 'varchar'
+              type: 'varchar',
+            },
+            {
+              name: 'value',
+              type: 'decimal',
+              precision: 10,
+              scale: 2,
             },
             {
               name: 'created_at',
-              type: 'varchar'
+              type: 'timestamp',
+              default: 'now()',
             },
             {
               name: 'updated_at',
-              type: 'varchar'
+              type: 'timestamp',
+              default: 'now()',
             }
           ]
         }
