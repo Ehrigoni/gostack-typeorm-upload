@@ -10,6 +10,9 @@ interface Balance {
 
 @EntityRepository(Transaction)
 class TransactionsRepository extends Repository<Transaction> {
+  static save(createdTransactions: any) {
+    throw new Error('Method not implemented.');
+  }
   public async getBalance(): Promise<Balance> {
     const transactions = await this.find();
 

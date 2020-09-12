@@ -7,7 +7,7 @@ import Transaction from '../models/Transaction';
 import Category from '../models/Category';
 
 import TransactionsRepository from '../repositories/TransactionsRepository';
-import CategoriesRepository from '../repositories/CategoriesRepository';
+// import CategoriesRepository from '../repositories/CategoriesRepository';
 
 interface CSVTransaction {
   title: string;
@@ -43,7 +43,6 @@ class ImportTransactionsService {
 
       categories.push(category);
       transactions.push({ title, type, value, category });
-
     });
     await new Promise(resolve => parseCSV.on('end', resolve));
 
@@ -54,15 +53,39 @@ class ImportTransactionsService {
     });
 
     const existentCategoriesTitles = existentCategories.map(
-    (category: Category) => category.title,
+      (category: Category) => category.title,
     );
 
-    const addCategoryTitles = categories.filter(
-      category => !existentCategoriesTitles.includes(category).filter((value,index,self)),
+    const addCategoryTitles = categories
+      .filter(category => !existentCategoriesTitles.includes(category))
+      .filter((value, index, self) => self.indexOf(value) === index);
+
+    const newCategories = categoriesRepository.create(
+      addCategoryTitles.map(title => ({
+        title,
+      })),
     );
 
-    console.log(existentCategoriesTitles);
-    console.log(transactions);
+    await categoriesRepository.save(newCategories);
+
+    const finalCategories = [...newCategories, ...existentCategories];
+
+    const createdTransactions = transactionsRepository.create(
+      transactions.map(transaction => ({
+        title: transaction.title,
+        type: transaction.type,
+        value: transaction.value,
+        category: finalCategories.find(
+          category => category.title === transaction.category,
+        ),
+      })),
+    );
+
+    await transactionsRepository.save(createdTransactions);
+
+    await fs.promises.unlink(filePath);
+
+    return createdTransactions;
   }
 }
 export default ImportTransactionsService;
